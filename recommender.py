@@ -109,14 +109,23 @@ def get_emotions_df(model, key):
     gpt = get_emotions(model, key)
     ls = list(json.loads(gpt).values())[0]
     df = pd.DataFrame(ls, columns = ['emotion'])
+    
+    #removing duplicates
+    before = df.shape[0]
+    value_counts = df['emotion'].value_counts() 
+    duplicate_counts = dict(value_counts[value_counts >1])
+    df.drop_duplicates(keep='first', inplace=True)
+    after = df.shape[0]
+    print(f'{before} emotions extracted, with {duplicate_counts} duplicate counts: {before-after} duplicate rows removed leaving {after} rows')
+
     df['emotion_id'] = df.index
     df = df[['emotion_id','emotion']]
     return df
 
-def get_scores_thing(thing, emotions_df, model, key):
+def get_scores_one(thing, emotions_df, model, key):
     emotions = list(emotions_df['emotion'].values)
     gpt = get_scores(thing, emotions, model, key)
-    scoresinfo = json.loads(gpt)['explanation']
+    info = json.loads(gpt)['explanation']
 
     df = pd.DataFrame(json.loads(gpt)['associations'])
     df.rename(columns = {'score': thing}, inplace=True)
@@ -124,29 +133,37 @@ def get_scores_thing(thing, emotions_df, model, key):
     df = pd.merge(df, emotions_df, on ='emotion', how ='right')
     df.drop('emotion', axis = 1, inplace=True)
     df= df[['emotion_id',f'{thing}']]
-    return ({thing: scoresinfo}, df)
+    return ({thing: info}, df)
 
-def get_scores_things(things, emotions_df, model, key):
-    scoreinfos = []
+def get_scores_all(things, emotions_df, model, key):
+    sinfo_all = []
     merged_df = pd.DataFrame()
     for thing in things:
-        scoreinfo, new_df = get_scores_thing(thing, emotions_df, model, key)
-        scoreinfos.append(scoreinfo)
+        sinfo_one, df = get_scores_one(thing, emotions_df, model, key)
+        sinfo_all.append(sinfo_one)
         if merged_df.empty:
-            merged_df = new_df
+            merged_df = df
         else:
-            merged_df = pd.merge(merged_df, new_df, on='emotion_id', how='left')
-    return (scoreinfos, merged_df)
+            merged_df = pd.merge(merged_df, df, on='emotion_id', how='left')
+    return (sinfo_all, merged_df)
 
-def get_brands_scores(emotions_df, model, key):
+def get_scores_brands(emotions_df, model, key):
     gpt = get_brands(model, key)
-
     brands_df = pd.DataFrame(list(json.loads(gpt).values())[0])
+
+    #remove duplicates
+    before = brands_df.shape[0]
+    value_counts = brands_df['name'].value_counts() 
+    duplicate_counts = dict(value_counts[value_counts >1])
+    brands_df.drop_duplicates(subset='name', keep='first', inplace=True)
+    after = brands_df.shape[0]
+    print(f'{before} brands extracted, with {duplicate_counts} duplicate counts: {before-after} duplicate rows removed leaving {after} rows')
+
     brands_df.reset_index(inplace= True)
     brands_df.rename({'index':'brand_id'}, axis = 1, inplace = True)
-    scoreinfos, scores_brands= get_scores_things(brands_df['name'], emotions_df, model, key)
-    scoreinfos_df= pd.DataFrame([(k,v) for data in scoreinfos for k,v in data.items()], columns = ['name', 'scores_info'])
-    brands_df = pd.merge(brands_df, scoreinfos_df, how = 'left', on ='name' )
+    sinfo_all, scores_brands= get_scores_all(brands_df['name'], emotions_df, model, key)
+    sinfo_all_df= pd.DataFrame([(k,v) for data in sinfo_all for k,v in data.items()], columns = ['name', 'scores_info'])
+    brands_df = pd.merge(brands_df, sinfo_all_df, how = 'left', on ='name' )
     brands_df['gpt'] = model
     brands_df = brands_df[['brand_id','name','brand_info', 'scores_info','gpt']]
 
@@ -155,6 +172,7 @@ def get_brands_scores(emotions_df, model, key):
     scores_brands = pd.merge(scores_brands, brands_df[['brand_id','name']], on ='name', how ='inner')
     scores_brands.drop('name', axis= 1, inplace=True)
     scores_brands = scores_brands[['emotion_id','brand_id','score']]
+    print(f"Got {scores_brands.shape[0]} emotion-brand association scores ({scores_brands['emotion_id'].nunique()} emotions and {scores_brands['brand_id'].nunique()} brands)")
     
     return (brands_df, scores_brands)
 
@@ -205,18 +223,18 @@ def check_data_exists(thing, number, update_brand_list, model, key):
                 scores_brands = pd.read_sql_query("SELECT * FROM 'association_scores'" , conn)
             else:
                 print('Generating brands data...')
-                brands_df, scores_brands = get_brands_scores(emotions_df, model, key)
+                brands_df, scores_brands = get_scores_brands(emotions_df, model, key)
                 brands_df.to_sql('brands', conn, if_exists = 'replace', index=False)
                 scores_brands.to_sql('association_scores', conn, if_exists = 'replace', index=False)
         else:
-            print("The data that I need is not in the 'database.db' so need to get it fresh...")
+            print("The data that I need is not in 'database.db', generating...")
             emotions_df = get_emotions_df(model, key)
-            brands_df, scores_brands = get_brands_scores(emotions_df, model, key)
+            brands_df, scores_brands = get_scores_brands(emotions_df, model, key)
             emotions_df.to_sql('emotions', conn, if_exists = 'replace', index=False)
             brands_df.to_sql('brands', conn, if_exists = 'replace', index=False)
             scores_brands.to_sql('association_scores', conn, if_exists = 'replace', index=False)
         
-        _,scores_thing = get_scores_thing(thing, emotions_df, model, key)
+        _,scores_thing = get_scores_one(thing, emotions_df, model, key)
         result = get_similarity(brands_df, scores_thing, scores_brands, number)
     
     print(f'Given your favorite book, {thing}, here is the brand(s) I recommend: {result}')
@@ -244,215 +262,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-#MVP---
-# import json
-# import pandas as pd
-# import os
-# import argparse
-# from itertools import islice
-# from sklearn.metrics.pairwise import cosine_similarity
-# from enum import Enum
-# from typing import List
-# from pydantic import BaseModel, Field
-# #!pip install openai -U
-# from openai import OpenAI
-
-# # Get human emotions using the Pydantic model for the API response
-# class EmotionsResponse(BaseModel):
-#     Characteristics: List[str] = Field(None, description="List of non-redundant human emotions.")
-
-# def get_emotions(model: str, api_key: str) -> List[str]:
-#     """Gets a list of 50 unique and non-redundant human emotions using the specified gpt model."""
-#     client = OpenAI(api_key=api_key)
-
-#     system_prompt = "Find 50 different, exclusive and unique human emotions. "\
-#     "For example, pick joy or happiness, pick Shame or Embarrassment, pick Envy or Jealousy, "\
-#     "pick Hate or disgust or hatered or Resentment. "\
-
-#     user_prompt = "Select 50 different and unique human emotions."
-
-#     try:
-#         completion = client.beta.chat.completions.parse(
-#             model= model,
-#             messages=[
-#                 {"role": "system", "content": "Be a helpful assistant."},
-#                 {"role": "system", "content": system_prompt},
-#                 {"role": "system", "content": "make sure to include either joy or happiness, not both."},
-#                 {"role": "system", "content": "make sure to include either Shame or Embarrassment, not both"},
-#                 {"role": "system", "content": "make sure to include either Envy or Jealousy, not both"},
-#                 {"role": "system", "content": "make sure to include either Hate or disgust or hatered or Resentment"},
-#                 {"role": "system", "content": "Check again to remove redundant emotions. I only want unique emotions."},
-#                 {"role": "user", "content": user_prompt}
-#             ],
-#             response_format=EmotionsResponse
-#         )
-
-#         #output in the defined pydantic style
-#         output = completion.choices[0].message.parsed
-
-#         with open('emotions.json', 'w') as f:
-#             json.dump(output.json(), f)
-#         return output.json()
-    
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return json.dumps({})
-
-# #Get 100 best selling American clothing brands using the Pydantic model for the API response
-# class BrandsResponse(BaseModel):
-#     Brands: List[str] = Field(None, description="Brands as a list of strings.")
-
-# def get_brands(model: str, api_key: str) -> List[str]:
-#     """Get 100 best selling American clothing brands using the specified gpt model."""
-#     client = OpenAI(api_key=api_key)
-#     try:
-#         #Call the API to get the completion
-#         completion = client.beta.chat.completions.parse(
-#             model= model,
-#             messages=[
-#                 {"role": "system", "content": "Find 100 non-redundant best selling American clothing brands."},
-#                 {"role": "user", "content": "Give me 100 best selling American clothing brands."}
-#             ],
-#             response_format=BrandsResponse
-#         )
-#         #output in the defined pydantic style
-#         output = completion.choices[0].message.parsed
-
-#         with open('brands.json', 'w') as f:
-#             json.dump(output.json(), f)
-
-#         return output.json()
-    
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         return json.dumps({})
-
-# # Embedding and getting association scores between an input and list of emotions
-# def emotional_association_scores(
-#         thing, 
-#         model,
-#         emotions, api_key
-#     ):
-
-#     client = OpenAI(api_key=api_key)
-
-#     Characteristic = Enum('Characteristic', dict([(emotion, emotion) for emotion in emotions]))
-
-#     class EmotionalAssociationScore(BaseModel):
-#         emotion: Characteristic
-#         score: float
-#         explanation: str
-
-#     class EmotionalAssociationScores(BaseModel):
-#         associations: List[EmotionalAssociationScore] = Field(description="A list of emotions and associated scores")
-
-#     prompt = f"Assign emotional association scores between {0} and {len(emotions)} for the provided thing. "\
-#     "Assign a score for each of the following emotions. Briefly, explain the reason behind the association score."\
-#     "Ensure the scores reflect the association strength for the specified thing. "\
-#     "Thing: "\
-#     f"{thing}"
-            
-#     completion = client.beta.chat.completions.parse(
-#         model = model,
-#         messages=[
-#             {"role": "system", "content": "Be a helpful assistant."},
-#             {"role": "user", "content": prompt}
-#         ],
-#         response_format=EmotionalAssociationScores,
-#     )
-#     #output in the defined pydantic style
-#     output = completion.choices[0].message.parsed
-#     return thing, output.json()
-
-# def get_df(thing, model, emotions, api_key):
-#     gpt = emotional_association_scores(thing, model, emotions, api_key)
-#     data = list(json.loads(gpt[1]).values())[0]
-#     df = pd.DataFrame(data)
-#     df.rename(columns = {'score': gpt[0]}, inplace=True)
-#     print(df)
-#     df.set_index('emotion', inplace=True)
-#     return df
-
-# def get_dfs(things, model, emotions, api_key):
-#     merged_df = pd.DataFrame()
-#     for thing in things:
-#         new_df = get_df(thing, model, emotions, api_key)
-#         if merged_df.empty:
-#             merged_df = new_df
-#         else:
-#             merged_df = pd.merge(merged_df, new_df, left_index=True, right_index=True, how='outer')
-#     return merged_df
-
-# def get_similarity(df, dfs, number):
-#     similarities = dict()
-#     # Reshape Series to 2D array (required by cosine_similarity)
-#     s1 = df.values.reshape(1, -1)
-
-#     for col in list(dfs.columns):
-#         s2= dfs[col].values.reshape(1, -1)
-#         cosine_sim = cosine_similarity(s1, s2)
-#         similarities[col]= cosine_sim[0][0]
-
-#     sorted_dict = dict(sorted(similarities.items(), key=lambda item: item[1], reverse = True))
-
-#     # Get the top number of recommendations based on similarity
-#     recommendations = list(dict(islice(sorted_dict.items(), number)).keys())
-#     return recommendations
-
-# def check_favorite_number(value):
-#     ivalue = int(value)
-#     if ivalue > 10:  #Desired maximum value
-#         raise argparse.ArgumentTypeError(f"Favorite number must not exceed 10.")
-#     return ivalue
-
-# def main():
-#     parser = argparse.ArgumentParser(description="Enter your number one favorite book you've read (just one book) and the number of top matching brands.")
-#     parser.add_argument('favorite_book', type=str, help='Your number one favorite book')
-#     parser.add_argument('number_of_brand_recommendations', type=check_favorite_number, help='Number of top matching brands (max 10)')
-#     parser.add_argument('update_brand_list', choices=['yes','no'], help='Update the list of brands (yes or no)')
-
-#     args = parser.parse_args()
-
-#     thing = args.favorite_book
-#     number = args.number_of_brand_recommendations
-#     update_brand_list = args.update_brand_list
-#     model = "gpt-4o-2024-08-06"
-#     api_key = os.environ.get('OPENAI_API_KEY')
-#     if api_key is None:
-#         raise ValueError("API key not found. Please set the 'OPENAI_API_KEY' environment variable.")
-
-#    # Retrieve emotions from datbase or through openAI API
-#     if os.path.exists('emotions.json'):
-#         with open('emotions.json', 'r') as f:
-#             emotions_json = json.load(f)
-#     else:
-#         emotions_json = get_emotions(model, api_key)
-#     emotions = list(json.loads(emotions_json).values())[0]
-    
-#     # Retrieve brand data based on user choice
-#     if update_brand_list == 'yes':
-#         things_json = get_brands(model, api_key)
-#     else:  # update_brand_list == 'no'
-#         with open('brands.json', 'r') as f:
-#             things_json = json.load(f)
-
-#     things = list(json.loads(things_json).values())[0][:4]
-
-#     dfs = get_dfs(things, model, emotions, api_key)
-#     dfs_cleaned = dfs.dropna(axis=1)
-
-#     df = get_df(thing, model, emotions, api_key)
-#     df_cleaned = df.dropna(axis=1)
-
-#     result = get_similarity(df_cleaned, dfs_cleaned, number)
-
-#     print(f'Given your favorite book, {thing}, the top {number} American clothing brands that match the most with your personality are {result}')
-
-# if __name__ == "__main__":
-#     main()
-
-
-
