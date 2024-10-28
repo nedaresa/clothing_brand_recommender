@@ -35,12 +35,14 @@ update_brand_list: user's preference to update brand list or not (str: yes no)
 To securely access your OpenAI API key from an environment variable, add it to your shell's configuration file. Access the key from the environment variable.
 
 
-* **Notes:** 
+Notes:
+
 * Cosine similarity: From among a variety of similarity and distance measures (2), recommender.py uses cosine similarity (3) to assess the directional alignment of two vectors, user's favorite book and a given brand at a time, across all emotion dimensions. As a normalized dot product, cosine similarity indicates higher similarity when two vectors point in similar directions across emotion dimensions, regardless of the magnitude of values in any specific dimension. Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
 
-A quick check used to confirm no need for vector l2 normalization for cosine similarity (sklearn.metrics.pairwise):
-import numpy as np \
-A = np.array([[2, 3]]) \
+* A quick check used to confirm no need for vector l2 normalization for cosine similarity (sklearn.metrics.pairwise):
+
+* import numpy as np \
+*   A = np.array([[2, 3]]) \
 B = np.array([[5, 4]]) 
 
 *Calculate cosine similarity without normalization \
@@ -50,10 +52,10 @@ cosine_sim_without_norm = cosine_similarity(A, B)
 A_normalized = A / np.linalg.norm(A) \
 B_normalized = B / np.linalg.norm(B)
 
-*# Calculate cosine similarity with normalization \
+*Calculate cosine similarity with normalization \
 cosine_sim_with_norm = cosine_similarity(A_normalized, B_normalized) 
 
-*#output is True \
+*prints True \
 cosine_sim_without_norm[0][0]==cosine_sim_with_norm[0][0]
 
 
