@@ -39,8 +39,8 @@ To securely access your OpenAI API key from an environment variable, add it to y
 * Cosine similarity: From among a variety of similarity and distance measures (2), recommender.py uses cosine similarity (3) to assess the directional alignment of two vectors, user's favorite book and a given brand at a time, across all emotion dimensions. As a normalized dot product, cosine similarity indicates higher similarity when two vectors point in similar directions across emotion dimensions, regardless of the magnitude of values in any specific dimension. Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
 
 A quick check used to confirm no need for vector l2 normalization for cosine similarity (sklearn.metrics.pairwise):
-*#import numpy as np
-*## Define your original vectors
+*#import numpy as np \
+*## Define your original vectors \
 *# A = np.array([[2, 3]])
 *# B = np.array([[5, 4]])
 
