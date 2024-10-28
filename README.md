@@ -39,28 +39,24 @@ To securely access your OpenAI API key from an environment variable, add it to y
 * Cosine similarity: From among a variety of similarity and distance measures (2), recommender.py uses cosine similarity (3) to assess the directional alignment of two vectors, user's favorite book and a given brand at a time, across all emotion dimensions. As a normalized dot product, cosine similarity indicates higher similarity when two vectors point in similar directions across emotion dimensions, regardless of the magnitude of values in any specific dimension. Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
 
 A quick check used to confirm no need for vector l2 normalization for cosine similarity (sklearn.metrics.pairwise):
-*#import numpy as np \
-*## Define your original vectors \
-*# A = np.array([[2, 3]])
-*# B = np.array([[5, 4]])
+import numpy as np \
+A = np.array([[2, 3]]) \
+B = np.array([[5, 4]]) \
 
-# # Calculate cosine similarity without normalization
-# cosine_sim_without_norm = cosine_similarity(A, B)
+*# Calculate cosine similarity without normalization \
+cosine_sim_without_norm = cosine_similarity(A, B) \
 
-# # L2 normalize the vectors
-# A_normalized = A / np.linalg.norm(A)
-# B_normalized = B / np.linalg.norm(B)
+*#L2 normalize the vectors \
+A_normalized = A / np.linalg.norm(A) \
+B_normalized = B / np.linalg.norm(B) \
 
-# # Calculate cosine similarity with normalization
-# cosine_sim_with_norm = cosine_similarity(A_normalized, B_normalized)
+*# Calculate cosine similarity with normalization \
+cosine_sim_with_norm = cosine_similarity(A_normalized, B_normalized) \
 
-# # Print the outputs
-# print("Cosine Similarity without normalization:")
-# print(cosine_sim_without_norm[0][0])  # Output from unnormalized vectors
-
-# print("\nCosine Similarity with normalization:")
-# print(cosine_sim_with_norm[0][0])      # Output from normalized vectors
-# cosine_sim_without_norm[0][0]==cosine_sim_with_norm[0][0]
+*# Print the outputs \
+print("Cosine Similarity without normalization:") \
+*#output is True \
+cosine_sim_without_norm[0][0]==cosine_sim_with_norm[0][0] \
 
 
 References:
