@@ -18,20 +18,23 @@ Workflow:
 5. Using cosine similarity, it shows the user the top number of brands with the highest similarity to user's favorite book. Number of recommendations to be defined by user with a max of 10.
 
 
-* **Notes:**
 
 * Data storage: recommender.py uses the sqlite3 library to create 'database.db' with 3 tables: 
 emotions (emotion_id, emotion), brands (brand_id, name, brand_info, scores_info, gpt), association_scores (emotion_id, brand_id, score). Note that scores_info is a brief explanation for each of the asscociation scores for each brand. With each run, recommender.py first ensures if all 3 tables are present. If less than 3 are present, it creates them all. If all are present, it then checks if the user wants the recommendations based on updated brands data. Given the value of update_brand_list argument, it either updates the brands table and regenerates association_scores or leaves the data as is. 
 
+* Usage
+* $python recommender.py 'One hundred years of Solitude' 10 'no'
+
 * Arguments:
-thing: user's favorite_book as string (only 1) 
-number: number of brand recommendations (max 10)
+favorite_book: user's favorite_book as string (only 1) 
+number_of_brand_recommendations: number of brand recommendations (max 10)
 update_brand_list: user's preference to update brand list or not (str: yes no)
 
 * OpenAI API key:
 To securely access your OpenAI API key from an environment variable, add it to your shell's configuration file. Access the key from the environment variable.
 
 
+* **Notes:** 
 * Cosine similarity: From among a variety of similarity and distance measures (2), recommender.py uses cosine similarity (3) to assess the directional alignment of two vectors, user's favorite book and a given brand at a time, across all emotion dimensions. As a normalized dot product, cosine similarity indicates higher similarity when two vectors point in similar directions across emotion dimensions, regardless of the magnitude of values in any specific dimension. Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
 
 A quick check used to confirm no need for vector l2 normalization for cosine similarity (sklearn.metrics.pairwise):
