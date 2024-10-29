@@ -37,28 +37,7 @@ To securely access your OpenAI API key from an environment variable, add it to y
 
 Notes:
 
-* Cosine similarity: From among a variety of similarity and distance measures (2), recommender.py uses cosine similarity (3) to assess the directional alignment of two vectors, user's favorite book and a given brand at a time, across all emotion dimensions. As a normalized dot product, cosine similarity indicates higher similarity when two vectors point in similar directions across emotion dimensions, regardless of the magnitude of values in any specific dimension. Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
+* Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
 
-* Confirmed no need to l2 normalize vectors for cosine similarity (sklearn.metrics.pairwise):
-
-    import numpy as np 
-    A = np.array([[2, 3]]) \
-    B = np.array([[5, 4]]) \
-    #Calculate cosine similarity without normalization \
-    cosine_sim_without_norm = cosine_similarity(A, B) \
-    #L2 normalize the vectors \
-    A_normalized = A / np.linalg.norm(A) \
-    B_normalized = B / np.linalg.norm(B) \
-    #Calculate cosine similarity with normalization \
-    cosine_sim_with_norm = cosine_similarity(A_normalized, B_normalized) \
-    #True \
-    cosine_sim_without_norm[0][0]==cosine_sim_with_norm[0][0]
-
-
-References:
-1. https://platform.openai.com/docs/guides/structured-outputs/introduction
-3. Cosine Similarity:
-https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
-
-2. binary similarity and distance metrics:
-https://www.iiisci.org/Journal/pdv/sci/pdfs/GS315JG.pdf
+Reference:
+https://platform.openai.com/docs/guides/structured-outputs/introduction
