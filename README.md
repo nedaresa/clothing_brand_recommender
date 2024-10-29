@@ -41,20 +41,17 @@ Notes:
 
 * A quick check used to confirm no need for vector l2 normalization for cosine similarity (sklearn.metrics.pairwise):
 
-*   import numpy as np 
-*   A = np.array([[2, 3]]) \
+    import numpy as np 
+    A = np.array([[2, 3]]) \
     B = np.array([[5, 4]]) \
-    *Calculate cosine similarity without normalization \
-    cosine_sim_without_norm = cosine_similarity(A, B) \
-    
-    *L2 normalize the vectors \
+    #Calculate cosine similarity without normalization \
+    cosine_sim_without_norm = cosine_similarity(A, B) 
+    #L2 normalize the vectors \
     A_normalized = A / np.linalg.norm(A) \
     B_normalized = B / np.linalg.norm(B)
-
-    *Calculate cosine similarity with normalization \
+    #Calculate cosine similarity with normalization \
     cosine_sim_with_norm = cosine_similarity(A_normalized, B_normalized) 
-
-    *True \
+    #True \
     cosine_sim_without_norm[0][0]==cosine_sim_with_norm[0][0]
 
 
