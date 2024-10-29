@@ -21,7 +21,7 @@ Workflow:
 
 
 Data storage: 
-    recommender.py uses the sqlite3 library to create 'database.db' with 3 tables: 
+* recommender.py uses the sqlite3 library to create 'database.db' with 3 tables: 
 emotions (emotion_id, emotion), brands (brand_id, name, brand_info, scores_info, gpt), association_scores (emotion_id, brand_id, score). Note that scores_info is a brief explanation for each of the asscociation scores for each brand. With each run, recommender.py first ensures if all 3 tables are present. If less than 3 are present, it creates them all. If all are present, it then checks if the user wants the recommendations based on updated brands data. Given the value of update_brand_list argument, it either updates the brands table and regenerates association_scores or leaves the data as is. 
 
 Usage: 
