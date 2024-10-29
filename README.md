@@ -25,19 +25,18 @@ Data storage:
 emotions (emotion_id, emotion), brands (brand_id, name, brand_info, scores_info, gpt), association_scores (emotion_id, brand_id, score). Note that scores_info is a brief explanation for each of the asscociation scores for each brand. With each run, recommender.py first ensures if all 3 tables are present. If less than 3 are present, it creates them all. If all are present, it then checks if the user wants the recommendations based on updated brands data. Given the value of update_brand_list argument, it either updates the brands table and regenerates association_scores or leaves the data as is. 
 
 Usage: 
-    $python recommender.py 'One hundred years of Solitude' 10 'no'
+* $python recommender.py 'One hundred years of Solitude' 10 'no'
 
 Arguments:
-    favorite_book: user's favorite_book as string (only 1) 
-    number_of_brand_recommendations: number of brand recommendations (max 10)
-    update_brand_list: user's preference to update brand list or not (str: yes no)
+* favorite_book: user's favorite_book as string (only 1) 
+* number_of_brand_recommendations: number of brand recommendations (max 10)
+* update_brand_list: user's preference to update brand list or not (str: yes no)
 
 OpenAI API key:
-    To securely access your OpenAI API key from an environment variable, add it to your shell's configuration file. Access the key from the environment variable.
+* To securely access your OpenAI API key from an environment variable, add it to your shell's configuration file. Access the key from the environment variable.
 
 
 Notes:
-
 * Since the emotional association scores (the input dimension values for cosine measurement) range from 0 to the number of emotions (e.g., 50), cosine similarity values are all positive.
 
 Reference:
