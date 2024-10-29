@@ -15,7 +15,7 @@ class EmotionsResponse(BaseModel):
     #None as default if value not provided
     Emotions: List[str] = Field(None, description="List of non-redundant human emotions.") 
 
-def get_emotions(model: str, key: str) -> List[str]:
+def get_emotions(model, key):
     """Gets a list of 50 unique and non-redundant human emotions using the specified gpt model."""
     client = OpenAI(api_key=key)
 
@@ -51,7 +51,7 @@ class BrandResponse(BaseModel):
 class BrandsResponse(BaseModel):
     brands: List[BrandResponse] = Field(description="A list of brand names and information.")
 
-def get_brands(model: str, key: str) -> List[str]:
+def get_brands(model, key):
     """Get 100 best selling American clothing brands using the specified gpt model. Provide a brief information about each brand."""
     client = OpenAI(api_key=key)
     try:
@@ -181,7 +181,7 @@ def get_similarity(brands_df, scores_thing, scores_brands, number):
     similarities = dict()
     scores_thing.sort_values(by='emotion_id',inplace=True)
     scores_thing.set_index('emotion_id', inplace=True)
-    # Reshape Series to 2D array (required by cosine_similarity)
+    # Reshape to 2D array with 1 row and len(emotions) columns (required by cosine_similarity)
     s1 = scores_thing.values.reshape(1, -1)
     print('s1 shape',s1.shape)
 
@@ -190,6 +190,7 @@ def get_similarity(brands_df, scores_thing, scores_brands, number):
         scores_brand = scores_brands.loc[scores_brands['brand_id']==brand_id]
         scores_brand = scores_brand.sort_values(by='emotion_id')
         scores_brand= scores_brand.set_index('emotion_id')
+        # Reshape to 2D array with 1 row and len(emotions) columns (required by cosine_similarity)
         s2= scores_brand['score'].values.reshape(1, -1)
         print('s2 shape',s1.shape)
         cosine_sim = cosine_similarity(s1, s2)
@@ -207,7 +208,7 @@ def check_favorite_number(value):
         raise argparse.ArgumentTypeError(f"Number of top matching brands must not exceed 10.")
     return ivalue
 
-def check_data_exists(thing, number, update_brand_list, model, key):
+def recommend_brands(thing, number, update_brand_list, model, key):
     with sqlite3.connect(os.path.abspath('database.db')) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name in ('emotions', 'brands', 'association_scores')")
@@ -257,7 +258,7 @@ def main():
     if key is None:
         raise ValueError("API key not found. Please set the 'OPENAI_API_KEY' environment variable.")
     
-    check_data_exists(thing, number, update_brand_list, model, key)
+    recommend_brands(thing, number, update_brand_list, model, key)
 
 
 if __name__ == "__main__":
