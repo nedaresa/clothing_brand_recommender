@@ -27,9 +27,9 @@ To securely access your key from an environment variable, add it to your shell's
 
 2. Gets 100 American clothing brands using the OpenAI API. This list can be updated depending on the user preference. Length is constant.
 
-3. Using OpenAI API, it loops through the brands (step 2) and prompts the GPT model to assess the connection between each brand name and emotion (step 1) by assigning emotional association scores to brand-emotion pairs, at the same time. Scores reflect the association strength for each pair and fall within 0 and number of emotions (e.g. 50) range, provided as part of the prompt. The prompt also requests a brief explanation for each of the association scores. The retrieved scores along with the score explanations are stored in the local SQLite database, `database.db`.
+3. Using OpenAI API, it loops through the brands (step 2) and prompts the GPT model to assess the connection between each brand name and emotion (step 1) by assigning emotional association scores to brand-emotion pairs, at the same time. Scores reflect the association strength for each pair and fall within 0 and number of emotions (e.g. 50) range, provided as part of the prompt. The prompt also requests a brief explanation for each of the scores. The retrieved scores along with the score explanations are stored in the local SQLite database, `database.db`.
 
-4. Using OpenAI API, it prompts the GPT model to assess the connection between user's favorite book and emotion (step 1) by assigning emotional association scores to book-emotion pairs at the same time. Scores reflect the association strength for each pair and fall within 0 and number of emotions (e.g. 50) range, provided as part of the prompt. The prompt also requests a brief explanation for each of the association scores.
+4. Similar to workflow in step 3, it prompts the GPT model to assess the connection between user's favorite book and emotion (step 1) by assigning emotional association scores to book-emotion pairs at the same time. Scores fall within the same range, 0 and number of emotions (e.g. 50). The prompt also requests a brief explanation for each of the scores.
 
 5. Using cosine similarity, it recommends the top brands with the highest similarity to user's favorite book. Number of recommendations is set by the user with a max of 10.
 
@@ -39,6 +39,6 @@ To securely access your key from an environment variable, add it to your shell's
 
 ##
 
-The emotional association scores, the vector elements for cosine measurement, range from 0 to the number of emotions (e.g., 50), leading to positive cosine similarity values.
+Note that all the cosine similarity values are positive given the positive emotional association scores, the vector elements for cosine measurement.
 
 Reference: https://platform.openai.com/docs/guides/structured-outputs/introduction
