@@ -1,7 +1,7 @@
 ## A clothing brand recommender
 
 
-It recommends the user clothing brands based on their favorite book. 
+`recommender.py` recommends the user clothing brands based on their favorite book. 
 
 ## Usage 
 `$python recommender.py 'One hundred years of Solitude' 10 'no'`
@@ -40,6 +40,6 @@ To securely access your key from an environment variable, add it to your shell's
 
 ##
 
-* The emotional association scores, the vector elements for cosine measurement, range from 0 to the number of emotions (e.g., 50), leading to positive cosine similarity values.
+The emotional association scores, the vector elements for cosine measurement, range from 0 to the number of emotions (e.g., 50), leading to positive cosine similarity values.
 
-* Reference: https://platform.openai.com/docs/guides/structured-outputs/introduction
+Reference: https://platform.openai.com/docs/guides/structured-outputs/introduction
