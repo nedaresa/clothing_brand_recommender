@@ -7,9 +7,9 @@
 `$python recommender.py 'One hundred years of Solitude' 10 'no'`
 
 ### Arguments:
-favorite_book: user's favorite_book as string (only 1) \
+favorite_book: user's favorite book (only 1) \
 number_of_brand_recommendations: number of brand recommendations (max 10) \
-update_brand_list: user's preference to update brand list or not (str: yes no)
+update_brand_list: preference to update brand list before getting the recommendations (str: yes no)
 
 ### API key
 To securely access your key from an environment variable, add it to your shell's configuration file.
