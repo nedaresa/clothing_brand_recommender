@@ -29,10 +29,9 @@ To securely access your key from an environment variable, add it to your shell's
 
 3. Using OpenAI API, it loops through the brands (step 2) and prompts the GPT model to assess the connection between each brand name and emotion (step 1) by assigning emotional association scores to brand-emotion pairs, at the same time. Scores reflect the association strength for each pair and fall within 0 and number of emotions (e.g. 50) range, provided as part of the prompt. The prompt also requests a brief explanation for each of the association scores. The retrieved scores along with the score explanations are stored in the local SQLite database, `database.db`.
 
-4. Using OpenAI API, it prompts the GPT model to assess the connection between user's favorite book and emotion (step 1) by assigning emotional association scores to book and emotion pairs at the same time. Scores reflect the association strength for each pair and fall within 0 and number of emotions (e.g. 50) range, provided as part of the prompt. The prompt also requests a brief explanation for each of the association scores.
+4. Using OpenAI API, it prompts the GPT model to assess the connection between user's favorite book and emotion (step 1) by assigning emotional association scores to book-emotion pairs at the same time. Scores reflect the association strength for each pair and fall within 0 and number of emotions (e.g. 50) range, provided as part of the prompt. The prompt also requests a brief explanation for each of the association scores.
 
-5. Using cosine similarity, it shows the user the top number of brands with the highest similarity to user's favorite book. Number of recommendations is set by the user with a max of 10.
-
+5. Using cosine similarity, it recommends the top brands with the highest similarity to user's favorite book. Number of recommendations is set by the user with a max of 10.
 
 ### Data storage
 
