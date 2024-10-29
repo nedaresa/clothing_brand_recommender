@@ -1,5 +1,6 @@
-## A clothing brand recommender
+Neda Jabbari 
 
+## A clothing brand recommender
 
 `recommender.py` recommends the user clothing brands based on their favorite book. 
 
