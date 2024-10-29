@@ -4,9 +4,9 @@
 Recommender.py recommends the user clothing brands based on their favorite book. 
 
 Key features:
-1. Here embeddings happen in a much smaller space of emotions (embedding dimension is emotions) as oppossed to ordinary, more common embeddings in a large space as more commonly done with openai api (read).
+1. Here embeddings are interpretable and happen in a much smaller space of emotions with embedding dimensions being individual emotions as oppossed to ordinary embeddings in a large space, more commonly done with OpenAI API.
 
-2. Recommender.py uses gpt at three different points: getting emotions, getting brands, embedding brands and/or favorite book in emotions space. For each of the three API call types, it uses Pydantic and the Structured Outputs feature to ensure adherance to JSON schema in the output (1) which makes database data modeling easier. "gpt-4o-2024-08-06" is the model of choice here, as it is among the gpt models with available structured output option. 
+2. Recommender.py uses gpt at three different points: getting emotions, getting brands, embedding brands and/or favorite book in emotions space. For each of the three API call types, it uses Pydantic and the Structured Outputs feature to ensure adherance to JSON schema in the output (reference below) which makes database data modeling easier. "gpt-4o-2024-08-06" is the model of choice here, as it is among the gpt models with available structured output option. 
 
 Workflow:
 1. Gets 50 unique human emotions using the OpenAI API. Length is constant.
@@ -32,8 +32,8 @@ Arguments:
 * number_of_brand_recommendations: number of brand recommendations (max 10)
 * update_brand_list: user's preference to update brand list or not (str: yes no)
 
-OpenAI API key:
-* To securely access your OpenAI API key from an environment variable, add it to your shell's configuration file. Access the key from the environment variable.
+API key:
+* To securely access your key from an environment variable, add it to your shell's configuration file. Access the key from the environment variable.
 
 
 Notes:
